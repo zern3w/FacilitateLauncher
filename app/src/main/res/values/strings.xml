@@ -1,0 +1,36 @@
+<resources>
+    <string name="app_name">FacilitateLauncher</string>
+
+    <!--Alarm Clock-->
+    <string name="alarm_button_text">Alarm Clock</string>
+    <string name="alarm_confirm_dialog_title">Confirmation</string>
+    <string name="alarm_confirm_dialog_message">Do you really want set the alarm clock to %1$s?</string>
+
+    <!--Camera-->
+    <string name="camera_button_text">Camera</string>
+
+    <!--Calculator-->
+    <string name="calculator_button_text">Calculator</string>
+
+    <!--Calendar-->
+    <string name="calendar_button_text">Calendar</string>
+
+    <!--Contact Book-->
+    <string name="contact_book_button_text">Contact Book</string>
+
+    <!--Gallery-->
+    <string name="gallery_button_text">Gallery</string>
+
+    <!--Music Player-->
+    <string name="music_player_button_text">Music Player</string>
+
+    <!--Note-->
+    <string name="note_button_text">Note</string>
+
+    <!--Phone Call-->
+    <string name="phone_call_button_text">Phone Call</string>
+
+    <!--Recorder-->
+    <string name="recorder_button_text">Recorder</string>
+
+</resources>
