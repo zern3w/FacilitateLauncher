@@ -189,7 +189,8 @@ public class MainActivity extends AppCompatActivity {
 
     private void btnCalculatorClicked() {
         Intent intent = new Intent();
-        intent.setClassName("com.android.calculator2", "com.android.calculator2.Calculator");
+        intent.setAction(Intent.ACTION_MAIN);
+        intent.addCategory(Intent.CATEGORY_APP_CALCULATOR);
         if (intent.resolveActivity(getPackageManager()) != null) {
             startActivity(intent);
         }
@@ -332,27 +333,27 @@ public class MainActivity extends AppCompatActivity {
         public Object instantiateItem(ViewGroup container, int position) {
             ImageView view = new ImageView(MainActivity.this);
             if (position == MenuConstant.EMERGENCY) {
-                view.setImageResource(R.drawable.ic_emergency);
+                view.setBackgroundResource(R.drawable.ic_emergency);
             } else if (position == MenuConstant.ALARM_CLOCK) {
-                view.setImageResource(R.drawable.ic_alarm_clock);
+                view.setBackgroundResource(R.drawable.ic_alarm_clock);
             } else if (position == MenuConstant.CAMERA) {
-                view.setImageResource(R.drawable.ic_camera);
+                view.setBackgroundResource(R.drawable.ic_camera);
             } else if (position == MenuConstant.CALCULATOR) {
-                view.setImageResource(R.drawable.ic_calculator);
+                view.setBackgroundResource(R.drawable.ic_calculator);
             } else if (position == MenuConstant.CALENDAR) {
-                view.setImageResource(R.drawable.ic_calendar);
+                view.setBackgroundResource(R.drawable.ic_calendar);
             } else if (position == MenuConstant.ADDRESS_BOOK) {
-                view.setImageResource(R.drawable.ic_address_book);
+                view.setBackgroundResource(R.drawable.ic_address_book);
             } else if (position == MenuConstant.GALLERY) {
-                view.setImageResource(R.drawable.ic_gallery);
+                view.setBackgroundResource(R.drawable.ic_gallery);
             } else if (position == MenuConstant.MUSIC_PLAYER) {
-                view.setImageResource(R.drawable.ic_music_player);
+                view.setBackgroundResource(R.drawable.ic_music_player);
             } else if (position == MenuConstant.PHONE_CALL) {
-                view.setImageResource(R.drawable.ic_phone);
+                view.setBackgroundResource(R.drawable.ic_phone);
             } else if (position == MenuConstant.RECORDER) {
-                view.setImageResource(R.drawable.ic_recorder);
+                view.setBackgroundResource(R.drawable.ic_recorder);
             }else if (position == MenuConstant.SETTING) {
-                view.setImageResource(R.drawable.ic_setting);
+                view.setBackgroundResource(R.drawable.ic_setting);
             }
 
             container.addView(view);
