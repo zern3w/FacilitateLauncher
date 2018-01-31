@@ -3,8 +3,8 @@
 
     <!--Alarm Clock-->
     <string name="alarm_button_text">Alarm Clock</string>
-    <string name="alarm_confirm_dialog_title">Confirmation</string>
-    <string name="alarm_confirm_dialog_message">Do you really want set the alarm clock to %1$s?</string>
+    <string name="alarm_confirm_dialog_title">ยืนยันรายการ</string>
+    <string name="alarm_confirm_dialog_message">คุณต้องการตั้งปลุกที่เวลา %1$s ใช่ไหม?</string>
 
     <!--Camera-->
     <string name="camera_button_text">Camera</string>
@@ -17,6 +17,8 @@
 
     <!--Contact Book-->
     <string name="contact_book_button_text">Contact Book</string>
+
+    <string name="emergency_number">1669</string>
 
     <!--Gallery-->
     <string name="gallery_button_text">Gallery</string>

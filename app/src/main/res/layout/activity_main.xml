@@ -1,114 +1,45 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp"
-    android:layout_marginBottom="36dp"
-    android:layout_marginTop="36dp"
-    android:weightSum="5"
-    tools:context="android.facilitatelauncher.MainActivity">
+    tools:context=".MainActivity">
 
-    <LinearLayout
+    <me.crosswall.lib.coverflow.core.PagerContainer
+        android:id="@+id/pagerContainer"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:orientation="horizontal"
-        android:weightSum="2">
-        <Button
-            android:id="@+id/btnAlarmClock"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/alarm_button_text" />
-        <Button
-            android:id="@+id/btnCamera"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/camera_button_text" />
-    </LinearLayout>
+        android:layout_height="match_parent">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:orientation="horizontal"
-        android:weightSum="2">
-        <Button
-            android:id="@+id/btnCalculator"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/calculator_button_text" />
-        <Button
-            android:id="@+id/btnCalendar"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/calendar_button_text" />
-    </LinearLayout>
+        <android.facilitatelauncher.view.ClickableViewPager
+            android:id="@+id/pager"
+            android:layout_width="250dp"
+            android:layout_height="250dp"
+            android:layout_gravity="center" />
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:orientation="horizontal"
-        android:weightSum="2">
-        <Button
-            android:id="@+id/btnContactBook"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/contact_book_button_text" />
-        <Button
-            android:id="@+id/btnGallery"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/gallery_button_text" />
-    </LinearLayout>
+        <TextView
+            android:id="@+id/tvClicked"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_margin="140dp"
+            android:textColor="@color/colorAccent"
+            android:gravity="bottom|center"
+            android:textSize="36dp"
+            android:clickable="true"/>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:orientation="horizontal"
-        android:weightSum="2">
-        <Button
-            android:id="@+id/btnMusicPlayer"
-            android:layout_width="0dp"
+        <TextView
+            android:id="@+id/tvTitle"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/music_player_button_text" />
-        <Button
-            android:id="@+id/btnNote"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/note_button_text" />
-    </LinearLayout>
+            android:layout_marginBottom="50dp"
+            android:textColor="@color/black"
+            android:layout_gravity="bottom|center"
+            android:hint="Title"
+            android:padding="8dp"
+            android:textSize="36dp"
+            android:clickable="true"/>
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:orientation="horizontal"
-        android:weightSum="2">
-        <Button
-            android:id="@+id/btnPhoneCall"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/phone_call_button_text" />
-        <Button
-            android:id="@+id/btnRecorder"
-            android:layout_width="0dp"
-            android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:text="@string/recorder_button_text" />
-    </LinearLayout>
-
+    </me.crosswall.lib.coverflow.core.PagerContainer>
 
 </LinearLayout>
