@@ -24,6 +24,7 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.Window;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -47,7 +48,10 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getWindow().requestFeature(Window.FEATURE_ACTION_BAR);
+        getSupportActionBar().hide();
         setContentView(R.layout.activity_main);
+
         PagerContainer mContainer = findViewById(R.id.pagerContainer);
         tvTitle = findViewById(R.id.tvTitle);
         tvClicked = findViewById(R.id.tvClicked);
@@ -55,10 +59,17 @@ public class MainActivity extends AppCompatActivity {
         positionClicked = 0;
 
         int PERMISSION_ALL = 1;
-        String[] PERMISSIONS = {Manifest.permission.CALL_PHONE, Manifest.permission.READ_CONTACTS, Manifest.permission.WRITE_CONTACTS
-        , };
+        String[] PERMISSIONS = {
+                Manifest.permission.CALL_PHONE,
+                Manifest.permission.READ_CONTACTS,
+                Manifest.permission.WRITE_CONTACTS,
+                Manifest.permission.RECORD_AUDIO,
+                Manifest.permission.WRITE_CONTACTS,
+                Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.READ_PHONE_STATE,
+        };
 
-        if(!hasPermissions(this, PERMISSIONS)){
+        if (!hasPermissions(this, PERMISSIONS)) {
             ActivityCompat.requestPermissions(this, PERMISSIONS, PERMISSION_ALL);
         }
 
@@ -95,7 +106,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 //                Toast.makeText(getApplicationContext(), "clicked:" + tvTitle.getText(), Toast.LENGTH_SHORT).show();
-               performClicked(positionClicked);
+                performClicked(positionClicked);
             }
         });
 
@@ -274,7 +285,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void emergencyCall(){
+    private void emergencyCall() {
         Intent intent = new Intent(Intent.ACTION_CALL);
         intent.setData(Uri.parse("tel:" + getString(R.string.emergency_number)));
         if (intent.resolveActivity(getPackageManager()) != null) {
@@ -302,7 +313,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void performClicked(int positionClicked){
+    private void performClicked(int positionClicked) {
         if (positionClicked == MenuConstant.EMERGENCY) {
             btnEmergencyClicked();
         } else if (positionClicked == MenuConstant.ALARM_CLOCK) {
@@ -352,7 +363,7 @@ public class MainActivity extends AppCompatActivity {
                 view.setBackgroundResource(R.drawable.ic_phone);
             } else if (position == MenuConstant.RECORDER) {
                 view.setBackgroundResource(R.drawable.ic_recorder);
-            }else if (position == MenuConstant.SETTING) {
+            } else if (position == MenuConstant.SETTING) {
                 view.setBackgroundResource(R.drawable.ic_setting);
             }
 

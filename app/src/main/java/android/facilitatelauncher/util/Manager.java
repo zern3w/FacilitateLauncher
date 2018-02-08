@@ -37,8 +37,8 @@ public class Manager {
                             Contact contact = new Contact();
                             contact.setContactId(cursor.getString(cursor
                                     .getColumnIndex(ContactsContract.CommonDataKinds.Phone.CONTACT_ID)));
-                            contact.setPhoneId(cursor.getString(cursor
-                                    .getColumnIndex(ContactsContract.CommonDataKinds.Phone._ID)));
+//                            contact.setPhoneId(cursor.getString(cursor
+//                                    .getColumnIndex(ContactsContract.CommonDataKinds.Phone._ID)));
                             contact.setName(cursor.getString(cursor
                                     .getColumnIndex(ContactsContract.CommonDataKinds.Phone.DISPLAY_NAME)));
 
