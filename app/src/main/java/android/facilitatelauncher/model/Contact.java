@@ -6,16 +6,26 @@ package android.facilitatelauncher.model;
 
 public class Contact {
 
-    private String contactId;
+    private int contactId;
     private String source;
-    private String number;
+    private String phoneNumber;
     private String name;
 
-    public String getContactId() {
+    public Contact(int contactId, String name, String source, String phoneNumber) {
+        this.contactId = contactId;
+        this.name = name;
+        this.phoneNumber = phoneNumber;
+        this.source = source;
+    }
+
+    public Contact() {
+    }
+
+    public int getContactId() {
         return contactId;
     }
 
-    public void setContactId(String contactId) {
+    public void setContactId(int contactId) {
         this.contactId = contactId;
     }
 
@@ -27,12 +37,12 @@ public class Contact {
         this.name = name;
     }
 
-    public String getNumber() {
-        return number;
+    public String getPhoneNumber() {
+        return phoneNumber;
     }
 
-    public void setNumber(String number) {
-        this.number = number;
+    public void setPhoneNumber(String phoneNumber) {
+        this.phoneNumber = phoneNumber;
     }
 
     public String getSource() {

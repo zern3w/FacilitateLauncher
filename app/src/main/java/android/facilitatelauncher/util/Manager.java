@@ -1,19 +1,37 @@
 package android.facilitatelauncher.util;
 
 import android.content.ContentResolver;
+import android.content.Context;
 import android.database.Cursor;
 import android.facilitatelauncher.model.Contact;
+import android.net.Uri;
 import android.provider.ContactsContract;
 import android.util.Log;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 /**
  * Created by puttipongtadang on 1/31/18.
  */
 
 public class Manager {
+
+    public int getContactIDFromNumber(Context context, String contactNumber) {
+        contactNumber = Uri.encode(contactNumber);
+        int phoneContactID = new Random().nextInt();
+        Cursor contactLookupCursor = context.getContentResolver().query(Uri.withAppendedPath(
+                ContactsContract.PhoneLookup.CONTENT_FILTER_URI, contactNumber),
+                new String[]{ContactsContract.PhoneLookup.DISPLAY_NAME, ContactsContract.PhoneLookup._ID},
+                null, null, null);
+        while (contactLookupCursor.moveToNext()) {
+            phoneContactID = contactLookupCursor.getInt(contactLookupCursor.getColumnIndexOrThrow(ContactsContract.PhoneLookup._ID));
+        }
+        contactLookupCursor.close();
+
+        return phoneContactID;
+    }
 
     public List<Contact> getAddressBookContact(ContentResolver resolver) {
 
@@ -35,7 +53,7 @@ public class Manager {
                             String number = cursor.getString(cursor.getColumnIndex(ContactsContract.CommonDataKinds.Phone.NUMBER));
 
                             Contact contact = new Contact();
-                            contact.setContactId(cursor.getString(cursor
+                            contact.setContactId(cursor.getInt(cursor
                                     .getColumnIndex(ContactsContract.CommonDataKinds.Phone.CONTACT_ID)));
 //                            contact.setPhoneId(cursor.getString(cursor
 //                                    .getColumnIndex(ContactsContract.CommonDataKinds.Phone._ID)));
@@ -48,7 +66,7 @@ public class Manager {
 //                            }
 //
 //                            if (!numberFormatted.isEmpty()) {
-                            contact.setNumber(number);
+                            contact.setPhoneNumber(number);
                             contacts.add(contact);
 //                            }
                             count++;

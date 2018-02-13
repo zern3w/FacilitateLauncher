@@ -61,7 +61,7 @@ public class ContactSelectionAdapter extends ArrayAdapter<Contact> {
         }
 
         holder.text.setText(list.get(position).getName());
-        holder.number.setText(list.get(position).getNumber());
+        holder.number.setText(list.get(position).getPhoneNumber());
 
         return view;
     }

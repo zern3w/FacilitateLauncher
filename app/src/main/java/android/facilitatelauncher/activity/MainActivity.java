@@ -1,10 +1,11 @@
-package android.facilitatelauncher;
+package android.facilitatelauncher.activity;
 
 import android.Manifest;
 import android.app.TimePickerDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.facilitatelauncher.R;
 import android.facilitatelauncher.util.Helper;
 import android.facilitatelauncher.util.MenuConstant;
 import android.facilitatelauncher.view.ClickableViewPager;
@@ -19,13 +20,11 @@ import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.text.InputType;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.TimePicker;
@@ -220,10 +219,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void btnContactBookClicked() {
-        Intent intent = new Intent(Intent.ACTION_VIEW, ContactsContract.Contacts.CONTENT_URI);
-        if (intent.resolveActivity(getPackageManager()) != null) {
-            startActivity(intent);
-        }
+        Intent intent = new Intent(this, AddressBookActivity.class);
+        startActivity(intent);
+//        Intent intent = new Intent(Intent.ACTION_VIEW, ContactsContract.Contacts.CONTENT_URI);
+//        if (intent.resolveActivity(getPackageManager()) != null) {
+//            startActivity(intent);
+//        }
     }
 
     private void btnEmergencyClicked() {

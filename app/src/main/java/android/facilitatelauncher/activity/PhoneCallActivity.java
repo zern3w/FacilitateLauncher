@@ -1,7 +1,8 @@
-package android.facilitatelauncher;
+package android.facilitatelauncher.activity;
 
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.facilitatelauncher.R;
 import android.media.MediaPlayer;
 import android.net.Uri;
 import android.support.v4.app.ActivityCompat;
@@ -140,6 +141,12 @@ public class PhoneCallActivity extends AppCompatActivity implements View.OnClick
     }
 
     private void playSound(int resId) {
+        if (mp == null) {
+            mp = new MediaPlayer();
+        } else {
+            mp.release();
+            mp = new MediaPlayer();
+        }
         mp = MediaPlayer.create(this, resId);
         mp.start();
     }

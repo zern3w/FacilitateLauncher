@@ -1,4 +1,4 @@
-package android.facilitatelauncher;
+package android.facilitatelauncher.activity;
 
 import android.content.ContentProviderOperation;
 import android.content.ContentResolver;
@@ -7,7 +7,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
+import android.facilitatelauncher.R;
+import android.facilitatelauncher.database.DatabaseHandler;
 import android.facilitatelauncher.model.Contact;
+import android.facilitatelauncher.util.Manager;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.net.Uri;
@@ -32,6 +35,7 @@ import android.widget.Toast;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import static android.Manifest.permission.RECORD_AUDIO;
@@ -50,6 +54,7 @@ public class RecorderActivity extends AppCompatActivity implements View.OnClickL
     private MediaPlayer mediaPlayer;
     private String phoneNumber;
     private boolean isPlayingRecord;
+    private Manager manager;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -115,18 +120,15 @@ public class RecorderActivity extends AppCompatActivity implements View.OnClickL
         phoneNumber = intent.getStringExtra("PHONE");
         random = new Random();
         isPlayingRecord = false;
+        manager = new Manager();
     }
 
     private void addToContact(ContentResolver resolver, Context context) {
         String displayName = etName.getText().toString().trim();
         String mobileNumber = phoneNumber;
         Uri recorded = null;
-        File record = new File(AudioSavePathInDevice);
-//        String HomeNumber = "1111";
-//        String WorkNumber = "2222";
-//        String emailID = "email@nomail.com";
-//        String company = "bad";
-//        String jobTitle = "abcd";
+        File record;
+        if (AudioSavePathInDevice != null) record = new File(AudioSavePathInDevice);
 
         ArrayList<ContentProviderOperation> ops = new ArrayList<ContentProviderOperation>();
 
@@ -165,11 +167,35 @@ public class RecorderActivity extends AppCompatActivity implements View.OnClickL
         try {
             resolver.applyBatch(ContactsContract.AUTHORITY, ops);
             updateContactRingtone(mobileNumber);
+            Contact contact = new Contact(manager.getContactIDFromNumber(getApplicationContext(), mobileNumber),
+                    displayName,
+                    AudioSavePathInDevice,
+                    mobileNumber);
+            addContactToDatabase(contact);
             Toast.makeText(context, "เพิ่มชื่อเข้ารายชื่อติดต่อเรียบร้อย", Toast.LENGTH_SHORT).show();
             finish();
         } catch (Exception e) {
             e.printStackTrace();
-            Toast.makeText(context, "เกิดข้อผิดพลาด: " + e.getMessage(), Toast.LENGTH_SHORT).show();
+            Toast.makeText(context, "เกิดข้อผิดพลาด: ", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private void addContactToDatabase(Contact contact) {
+        DatabaseHandler db = new DatabaseHandler(this);
+
+        db.addContact(contact);
+
+        // Reading all contacts
+        Log.d("Reading: ", "Reading all contacts..");
+        List<Contact> contacts = db.getAllContacts();
+
+        for (Contact cn : contacts) {
+            String log = "Id: " + cn.getContactId() +
+                    " ,Name: " + cn.getName() + " " +
+                    ",Phone: " + cn.getPhoneNumber() +
+                    ",Source: " + cn.getSource();
+            // Writing Contacts to log
+            Log.d("Name: ", log);
         }
     }
 
