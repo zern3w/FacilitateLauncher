@@ -30,7 +30,7 @@
                 android:layout_height="match_parent"
                 android:background="?attr/selectableItemBackground"
                 android:padding="6dp"
-                android:src="@drawable/ic_phone_white"
+                android:src="@drawable/ic_phone"
                 android:textColor="#ffffff" />
         </LinearLayout>
 

@@ -5,6 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
+    android:background="@drawable/bg"
     tools:context=".activity.MainActivity">
 
     <me.crosswall.lib.coverflow.core.PagerContainer
@@ -37,7 +38,7 @@
             android:layout_gravity="bottom|center"
             android:hint="Title"
             android:padding="8dp"
-            android:textSize="36dp"
+            android:textSize="64sp"
             android:clickable="true"/>
 
     </me.crosswall.lib.coverflow.core.PagerContainer>

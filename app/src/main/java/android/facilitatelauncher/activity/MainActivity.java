@@ -2,6 +2,7 @@ package android.facilitatelauncher.activity;
 
 import android.Manifest;
 import android.app.TimePickerDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -35,6 +36,7 @@ import java.util.Calendar;
 
 import me.crosswall.lib.coverflow.core.CoverTransformer;
 import me.crosswall.lib.coverflow.core.PagerContainer;
+import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 import static android.facilitatelauncher.util.Helper.hasPermissions;
 
@@ -43,6 +45,11 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = "MainActivity";
     private TextView tvTitle, tvClicked;
     private int positionClicked;
+
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -365,7 +372,7 @@ public class MainActivity extends AppCompatActivity {
             } else if (position == MenuConstant.RECORDER) {
                 view.setBackgroundResource(R.drawable.ic_recorder);
             } else if (position == MenuConstant.SETTING) {
-                view.setBackgroundResource(R.drawable.ic_setting);
+                view.setBackgroundResource(R.drawable.ic_settings);
             }
 
             container.addView(view);
