@@ -5,6 +5,7 @@ import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.facilitatelauncher.R;
 import android.facilitatelauncher.util.Helper;
@@ -32,7 +33,10 @@ import android.widget.TimePicker;
 
 import com.google.android.gms.actions.NoteIntents;
 
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.List;
 
 import me.crosswall.lib.coverflow.core.CoverTransformer;
 import me.crosswall.lib.coverflow.core.PagerContainer;
@@ -55,7 +59,9 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         getWindow().requestFeature(Window.FEATURE_ACTION_BAR);
-        getSupportActionBar().hide();
+        if (getSupportActionBar() != null) {
+            getSupportActionBar().hide();
+        }
         setContentView(R.layout.activity_main);
 
         PagerContainer mContainer = findViewById(R.id.pagerContainer);
@@ -205,11 +211,26 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void btnCalculatorClicked() {
-        Intent intent = new Intent();
-        intent.setAction(Intent.ACTION_MAIN);
-        intent.addCategory(Intent.CATEGORY_APP_CALCULATOR);
-        if (intent.resolveActivity(getPackageManager()) != null) {
-            startActivity(intent);
+        ArrayList<HashMap<String, Object>> items = new ArrayList<HashMap<String, Object>>();
+
+        final PackageManager pm = getPackageManager();
+        List<PackageInfo> packs = pm.getInstalledPackages(0);
+        for (PackageInfo pi : packs) {
+            if (pi.packageName.toString().toLowerCase().contains("calcul")) {
+                HashMap<String, Object> map = new HashMap<String, Object>();
+                map.put("appName", pi.applicationInfo.loadLabel(pm));
+                map.put("packageName", pi.packageName);
+                items.add(map);
+            }
+        }
+
+        if (items.size() >= 1) {
+            String packageName = (String) items.get(0).get("packageName");
+            Intent i = pm.getLaunchIntentForPackage(packageName);
+            if (i != null)
+                startActivity(i);
+        } else {
+            // Application not found
         }
     }
 
@@ -226,7 +247,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void btnContactBookClicked() {
-        Intent intent = new Intent(this, AddressBookActivity.class);
+        Intent intent = new Intent(this, MenuChooserActivity.class);
         startActivity(intent);
 //        Intent intent = new Intent(Intent.ACTION_VIEW, ContactsContract.Contacts.CONTENT_URI);
 //        if (intent.resolveActivity(getPackageManager()) != null) {
@@ -386,7 +407,7 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public int getCount() {
-            return 10;
+            return 11;
         }
 
         @Override

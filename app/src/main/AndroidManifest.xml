@@ -44,6 +44,7 @@
         <activity android:name=".activity.PhoneCallActivity" />
         <activity android:name=".activity.RecorderActivity" />
         <activity android:name=".activity.AddressBookActivity" />
+        <activity android:name=".activity.MenuChooserActivity"></activity>
     </application>
 
 </manifest>

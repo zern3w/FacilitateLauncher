@@ -1,5 +1,6 @@
 package android.facilitatelauncher.activity;
 
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -35,6 +36,7 @@ import java.util.List;
 
 import me.crosswall.lib.coverflow.core.CoverTransformer;
 import me.crosswall.lib.coverflow.core.PagerContainer;
+import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 public class AddressBookActivity extends AppCompatActivity {
     private int positionSelected;
@@ -45,6 +47,11 @@ public class AddressBookActivity extends AppCompatActivity {
     private MediaPlayer mediaPlayer;
     private TextView tvNoContact;
     private List<Contact> contatactList = new ArrayList<>();
+
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

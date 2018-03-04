@@ -1,5 +1,6 @@
 package android.facilitatelauncher.activity;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.facilitatelauncher.R;
@@ -14,6 +15,8 @@ import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
+
 public class PhoneCallActivity extends AppCompatActivity implements View.OnClickListener {
     private TextView tvNumber;
     private Button btnOne, btnTwo, btnThree, btnFour, btnFive,
@@ -21,6 +24,11 @@ public class PhoneCallActivity extends AppCompatActivity implements View.OnClick
     private Button btnClear, btnAddToContact, btnCall;
     private String phoneNumber;
     private MediaPlayer mp;
+
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

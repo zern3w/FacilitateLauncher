@@ -38,6 +38,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
+import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
+
 import static android.Manifest.permission.RECORD_AUDIO;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 
@@ -55,6 +57,11 @@ public class RecorderActivity extends AppCompatActivity implements View.OnClickL
     private String phoneNumber;
     private boolean isPlayingRecord;
     private Manager manager;
+
+    @Override
+    protected void attachBaseContext(Context newBase) {
+        super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase));
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
