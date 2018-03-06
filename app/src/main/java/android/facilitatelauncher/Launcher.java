@@ -2,6 +2,7 @@ package android.facilitatelauncher;
 
 import android.content.Intent;
 import android.facilitatelauncher.activity.MainActivity;
+import android.facilitatelauncher.activity.MenuChooserActivity;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -20,7 +21,7 @@ public class Launcher extends AppCompatActivity {
     }
 
     private void showApp(){
-        Intent intent = new Intent(this, MainActivity.class);
+        Intent intent = new Intent(this, MenuChooserActivity.class);
         startActivity(intent);
     }
 }

@@ -14,24 +14,20 @@ import android.facilitatelauncher.view.ClickableViewPager;
 import android.net.Uri;
 import android.provider.AlarmClock;
 import android.provider.CalendarContract;
-import android.provider.ContactsContract;
 import android.provider.MediaStore;
+import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.TimePicker;
-
-import com.google.android.gms.actions.NoteIntents;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -42,13 +38,15 @@ import me.crosswall.lib.coverflow.core.CoverTransformer;
 import me.crosswall.lib.coverflow.core.PagerContainer;
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
+import static android.facilitatelauncher.activity.MenuChooserActivity.ELDER_TYPE;
 import static android.facilitatelauncher.util.Helper.hasPermissions;
 
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = "MainActivity";
-    private TextView tvTitle, tvClicked;
+    private int userType = -1;
     private int positionClicked;
+    private TextView tvTitle, tvClicked;
 
     @Override
     protected void attachBaseContext(Context newBase) {
@@ -58,55 +56,37 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        intiActionBar();
+        setContentView(R.layout.activity_main);
+
+        initInstance();
+        initView();
+        initListener();
+        initViewPager();
+
+        requestPermission();
+    }
+
+    private void intiActionBar() {
         getWindow().requestFeature(Window.FEATURE_ACTION_BAR);
         if (getSupportActionBar() != null) {
             getSupportActionBar().hide();
         }
-        setContentView(R.layout.activity_main);
+    }
 
-        PagerContainer mContainer = findViewById(R.id.pagerContainer);
+    private void initInstance() {
+        Intent intent = getIntent();
+        userType = intent.getIntExtra("USER_TYPE", -1);
+        positionClicked = 0;
+    }
+
+    private void initView() {
         tvTitle = findViewById(R.id.tvTitle);
         tvClicked = findViewById(R.id.tvClicked);
         tvTitle.setText("โทรฉุกเฉิน");
-        positionClicked = 0;
+    }
 
-        int PERMISSION_ALL = 1;
-        String[] PERMISSIONS = {
-                Manifest.permission.CALL_PHONE,
-                Manifest.permission.READ_CONTACTS,
-                Manifest.permission.WRITE_CONTACTS,
-                Manifest.permission.RECORD_AUDIO,
-                Manifest.permission.WRITE_CONTACTS,
-                Manifest.permission.READ_EXTERNAL_STORAGE,
-                Manifest.permission.READ_PHONE_STATE,
-        };
-
-        if (!hasPermissions(this, PERMISSIONS)) {
-            ActivityCompat.requestPermissions(this, PERMISSIONS, PERMISSION_ALL);
-        }
-
-        final ClickableViewPager pager = (ClickableViewPager) mContainer.getViewPager();
-
-        PagerAdapter adapter = new MyPagerAdapter();
-        pager.setAdapter(adapter);
-
-        pager.setOffscreenPageLimit(adapter.getCount());
-
-        final ViewPager bindingPager = findViewById(R.id.pager);
-        bindingPager.setAdapter(adapter);
-        bindingPager.setOffscreenPageLimit(adapter.getCount());
-
-        pager.setPageTransformer(false, new CoverTransformer(0.3f, -60f, 0f, 0f));
-        Log.d("###", "pager1 width:" + 150 * getResources().getDisplayMetrics().density);
-
-        bindingPager.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View view, MotionEvent motionEvent) {
-                pager.onTouchEvent(motionEvent);
-                return false;
-            }
-        });
-
+    private void initListener() {
         tvClicked.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -117,13 +97,24 @@ public class MainActivity extends AppCompatActivity {
         tvTitle.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-//                Toast.makeText(getApplicationContext(), "clicked:" + tvTitle.getText(), Toast.LENGTH_SHORT).show();
                 performClicked(positionClicked);
             }
         });
+    }
 
+    private void initViewPager() {
+        final ViewPager bindingPager = findViewById(R.id.pager);
+        final PagerContainer mContainer = findViewById(R.id.pagerContainer);
+        final ClickableViewPager pager = (ClickableViewPager) mContainer.getViewPager();
+
+        PagerAdapter adapter = new MyPagerAdapter();
+        bindingPager.setAdapter(adapter);
+        bindingPager.setOffscreenPageLimit(adapter.getCount());
+
+        pager.setAdapter(adapter);
+        pager.setOffscreenPageLimit(adapter.getCount());
+        pager.setPageTransformer(false, new CoverTransformer(0.3f, -60f, 0f, 0f));
         pager.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
-
             private int index = 0;
 
             @Override
@@ -147,6 +138,23 @@ public class MainActivity extends AppCompatActivity {
 
             }
         });
+    }
+
+    private void requestPermission() {
+        int PERMISSION_ALL = 1;
+        String[] PERMISSIONS = {
+                Manifest.permission.CALL_PHONE,
+                Manifest.permission.READ_CONTACTS,
+                Manifest.permission.WRITE_CONTACTS,
+                Manifest.permission.RECORD_AUDIO,
+                Manifest.permission.WRITE_CONTACTS,
+                Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.READ_PHONE_STATE,
+        };
+
+        if (!hasPermissions(this, PERMISSIONS)) {
+            ActivityCompat.requestPermissions(this, PERMISSIONS, PERMISSION_ALL);
+        }
     }
 
     private String getTitle(int position) {
@@ -177,171 +185,6 @@ public class MainActivity extends AppCompatActivity {
         return title;
     }
 
-    private void btnAlarmClockClicked() {
-        Calendar mcurrentTime = Calendar.getInstance();
-        int hour = mcurrentTime.get(Calendar.HOUR_OF_DAY);
-        int minute = mcurrentTime.get(Calendar.MINUTE);
-        TimePickerDialog mTimePicker;
-        mTimePicker = new TimePickerDialog(this, R.style.HoloDialog, new TimePickerDialog.OnTimeSetListener() {
-            @Override
-            public void onTimeSet(TimePicker timePicker, final int selectedHour, final int selectedMinute) {
-                String selectedTime = Helper.intToString(selectedHour, 2) + ":" + Helper.intToString(selectedMinute, 2);
-                String dialogMessage = getString(R.string.alarm_confirm_dialog_message, selectedTime);
-
-                new AlertDialog.Builder(MainActivity.this)
-                        .setTitle(R.string.alarm_confirm_dialog_title)
-                        .setMessage(dialogMessage)
-                        .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int whichButton) {
-                                createAlarm(selectedHour, selectedMinute);
-                            }
-                        })
-                        .setNegativeButton(android.R.string.no, null).show();
-            }
-        }, hour, minute, true);//Yes 24 hour time
-        mTimePicker.setTitle("เลือกเวลา");
-        mTimePicker.show();
-    }
-
-    private void btnCameraClicked() {
-        Intent intent = new Intent(MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA);
-        if (intent.resolveActivity(getPackageManager()) != null) {
-            startActivity(intent);
-        }
-    }
-
-    private void btnCalculatorClicked() {
-        ArrayList<HashMap<String, Object>> items = new ArrayList<HashMap<String, Object>>();
-
-        final PackageManager pm = getPackageManager();
-        List<PackageInfo> packs = pm.getInstalledPackages(0);
-        for (PackageInfo pi : packs) {
-            if (pi.packageName.toString().toLowerCase().contains("calcul")) {
-                HashMap<String, Object> map = new HashMap<String, Object>();
-                map.put("appName", pi.applicationInfo.loadLabel(pm));
-                map.put("packageName", pi.packageName);
-                items.add(map);
-            }
-        }
-
-        if (items.size() >= 1) {
-            String packageName = (String) items.get(0).get("packageName");
-            Intent i = pm.getLaunchIntentForPackage(packageName);
-            if (i != null)
-                startActivity(i);
-        } else {
-            // Application not found
-        }
-    }
-
-
-    private void btnCalendarClicked() {
-        Intent intent = new Intent(Intent.ACTION_INSERT);
-        intent.setData(CalendarContract.Events.CONTENT_URI);
-//        Intent intent = new Intent();
-//        ComponentName cn = new ComponentName("com.android.calendar", "com.android.calendar.LaunchActivity");
-//        intent.setComponent(cn);
-        if (intent.resolveActivity(getPackageManager()) != null) {
-            startActivity(intent);
-        }
-    }
-
-    private void btnContactBookClicked() {
-        Intent intent = new Intent(this, MenuChooserActivity.class);
-        startActivity(intent);
-//        Intent intent = new Intent(Intent.ACTION_VIEW, ContactsContract.Contacts.CONTENT_URI);
-//        if (intent.resolveActivity(getPackageManager()) != null) {
-//            startActivity(intent);
-//        }
-    }
-
-    private void btnEmergencyClicked() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("ยืนยันการโทร");
-        builder.setMessage("คุณต้องการที่จะโทรฉุกเฉิน?");
-
-        // Set up the buttons
-        builder.setPositiveButton("ยืนยัน", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                emergencyCall();
-            }
-        });
-        builder.setNegativeButton("ยกเลิก", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-            }
-        });
-        builder.show();
-
-    }
-
-    private void btnGalleryClicked() {
-        Intent intent = new Intent(Intent.ACTION_VIEW, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-        if (intent.resolveActivity(getPackageManager()) != null) {
-            startActivity(intent);
-        }
-    }
-
-    private void btnMusicPlayerClicked() {
-        Intent intent = new Intent(MediaStore.INTENT_ACTION_MUSIC_PLAYER);
-        if (intent.resolveActivity(getPackageManager()) != null) {
-            startActivity(intent);
-        }
-    }
-
-    private void btnNoteClicked() {
-        Intent intent = new Intent(NoteIntents.ACTION_CREATE_NOTE);
-        if (intent.resolveActivity(getPackageManager()) != null) {
-            startActivity(intent);
-        }
-    }
-
-    private void btnPhoneCallClicked() {
-        Intent intent = new Intent(this, PhoneCallActivity.class);
-        startActivity(intent);
-//        Intent intent = new Intent(Intent.ACTION_DIAL);
-//        if (intent.resolveActivity(getPackageManager()) != null) {
-//            startActivity(intent);
-//        }
-    }
-
-    private void btnRecorderClicked() {
-        Intent intent = new Intent(MediaStore.Audio.Media.RECORD_SOUND_ACTION);
-        if (intent.resolveActivity(getPackageManager()) != null) {
-            startActivity(intent);
-        }
-    }
-
-    private void emergencyCall() {
-        Intent intent = new Intent(Intent.ACTION_CALL);
-        intent.setData(Uri.parse("tel:" + getString(R.string.emergency_number)));
-        if (intent.resolveActivity(getPackageManager()) != null) {
-            if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
-                // TODO: Consider calling
-                //    ActivityCompat#requestPermissions
-                // here to request the missing permissions, and then overriding
-                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
-                //                                          int[] grantResults)
-                // to handle the case where the user grants the permission. See the documentation
-                // for ActivityCompat#requestPermissions for more details.
-                return;
-            }
-            startActivity(intent);
-        }
-    }
-
-
-    public void createAlarm(int hour, int minutes) {
-        Intent intent = new Intent(AlarmClock.ACTION_SET_ALARM)
-                .putExtra(AlarmClock.EXTRA_HOUR, hour)
-                .putExtra(AlarmClock.EXTRA_MINUTES, minutes);
-        if (intent.resolveActivity(getPackageManager()) != null) {
-            startActivity(intent);
-        }
-    }
-
     private void performClicked(int positionClicked) {
         if (positionClicked == MenuConstant.EMERGENCY) {
             btnEmergencyClicked();
@@ -364,7 +207,161 @@ public class MainActivity extends AppCompatActivity {
         } else if (positionClicked == MenuConstant.RECORDER) {
             btnRecorderClicked();
         } else if (positionClicked == MenuConstant.SETTING) {
+            btnSettingCLicked();
         }
+    }
+
+    private void btnAlarmClockClicked() {
+        Calendar mcurrentTime = Calendar.getInstance();
+        int hour = mcurrentTime.get(Calendar.HOUR_OF_DAY);
+        int minute = mcurrentTime.get(Calendar.MINUTE);
+        TimePickerDialog mTimePicker;
+        mTimePicker = new TimePickerDialog(this, R.style.HoloDialog, new TimePickerDialog.OnTimeSetListener() {
+            @Override
+            public void onTimeSet(TimePicker timePicker, final int selectedHour, final int selectedMinute) {
+                String selectedTime = Helper.intToString(selectedHour, 2) + ":" + Helper.intToString(selectedMinute, 2);
+                String dialogMessage = getString(R.string.alarm_confirm_dialog_message, selectedTime);
+
+                new AlertDialog.Builder(MainActivity.this)
+                        .setTitle(R.string.alarm_confirm_dialog_title)
+                        .setMessage(dialogMessage)
+                        .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
+                            public void onClick(DialogInterface dialog, int whichButton) {
+                                createAlarm(selectedHour, selectedMinute);
+                            }
+                        })
+                        .setNegativeButton(android.R.string.no, null).show();
+            }
+        }, hour, minute, true);
+        mTimePicker.setTitle("เลือกเวลา");
+        mTimePicker.show();
+    }
+
+    private void btnCameraClicked() {
+        Intent intent = new Intent(MediaStore.INTENT_ACTION_STILL_IMAGE_CAMERA);
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            startActivity(intent);
+        } else {
+            showSnackBar("ไม่มีแอพกล้อง");
+        }
+    }
+
+    private void btnCalculatorClicked() {
+        ArrayList<HashMap<String, Object>> items = new ArrayList<HashMap<String, Object>>();
+        final PackageManager pm = getPackageManager();
+        List<PackageInfo> packs = pm.getInstalledPackages(0);
+        for (PackageInfo pi : packs) {
+            if (pi.packageName.toString().toLowerCase().contains("calcul")) {
+                HashMap<String, Object> map = new HashMap<String, Object>();
+                map.put("appName", pi.applicationInfo.loadLabel(pm));
+                map.put("packageName", pi.packageName);
+                items.add(map);
+            }
+        }
+        if (items.size() >= 1) {
+            String packageName = (String) items.get(0).get("packageName");
+            Intent i = pm.getLaunchIntentForPackage(packageName);
+            if (i != null)
+                startActivity(i);
+        } else {
+            showSnackBar("ไม่มีแอพเครื่องคิดเลข");
+        }
+    }
+
+
+    private void btnCalendarClicked() {
+        Intent intent = new Intent(Intent.ACTION_INSERT);
+        intent.setData(CalendarContract.Events.CONTENT_URI);
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            startActivity(intent);
+        } else {
+            showSnackBar("ไม่มีแอพปฏิทิน");
+        }
+    }
+
+    private void btnContactBookClicked() {
+        Intent intent = new Intent(getApplicationContext(), AddressBookActivity.class);
+        startActivity(intent);
+    }
+
+    private void btnEmergencyClicked() {
+        AlertDialog.Builder builder = new AlertDialog.Builder(this);
+        builder.setTitle("ยืนยันการโทร");
+        builder.setMessage("คุณต้องการที่จะโทรฉุกเฉิน?");
+        builder.setPositiveButton("ยืนยัน", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                emergencyCall();
+            }
+        });
+        builder.setNegativeButton("ยกเลิก", new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                dialog.cancel();
+            }
+        });
+        builder.show();
+    }
+
+    private void btnGalleryClicked() {
+        Intent intent = new Intent(Intent.ACTION_VIEW, android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            startActivity(intent);
+        } else {
+            showSnackBar("ไม่มีแอพคลังภาพ");
+        }
+    }
+
+    private void btnMusicPlayerClicked() {
+        Intent intent = new Intent(MediaStore.INTENT_ACTION_MUSIC_PLAYER);
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            startActivity(intent);
+        } else {
+            showSnackBar("ไม่มีแอพเครื่องเล่นเพลง");
+        }
+    }
+
+    private void btnPhoneCallClicked() {
+        Intent intent = new Intent(this, PhoneCallActivity.class);
+        startActivity(intent);
+    }
+
+    private void btnRecorderClicked() {
+        Intent intent = new Intent(MediaStore.Audio.Media.RECORD_SOUND_ACTION);
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            startActivity(intent);
+        } else {
+            showSnackBar("ไม่มีแอพเครื่องบันทึกเสียง");
+        }
+    }
+
+    private void btnSettingCLicked() {
+        Intent intent = new Intent(this, MenuChooserActivity.class);
+        startActivity(intent);
+    }
+
+    private void emergencyCall() {
+        Intent intent = new Intent(Intent.ACTION_CALL);
+        intent.setData(Uri.parse("tel:" + getString(R.string.emergency_number)));
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
+                return;
+            }
+            startActivity(intent);
+        }
+    }
+
+    private void createAlarm(int hour, int minutes) {
+        Intent intent = new Intent(AlarmClock.ACTION_SET_ALARM)
+                .putExtra(AlarmClock.EXTRA_HOUR, hour)
+                .putExtra(AlarmClock.EXTRA_MINUTES, minutes);
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            startActivity(intent);
+        }
+    }
+
+    private void showSnackBar(String msg){
+        Snackbar.make(findViewById(android.R.id.content), msg, Snackbar.LENGTH_LONG).show();
     }
 
     private class MyPagerAdapter extends PagerAdapter {
@@ -407,7 +404,8 @@ public class MainActivity extends AppCompatActivity {
 
         @Override
         public int getCount() {
-            return 11;
+            if (userType == ELDER_TYPE) return 11;
+            else return 5;
         }
 
         @Override

@@ -1,16 +1,20 @@
 package android.facilitatelauncher.activity
 
-import android.app.PendingIntent.getActivity
 import android.content.Context
+import android.content.Intent
 import android.facilitatelauncher.R
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper
 
 import kotlinx.android.synthetic.main.activity_menu_chooser.*
 
-class MenuChooserActivity : AppCompatActivity() {
+public class MenuChooserActivity : AppCompatActivity() {
+
+    companion object {
+        @JvmField val ELDER_TYPE = 0
+        @JvmField val HANDICAP_TYPE = 1
+    }
 
     override fun attachBaseContext(newBase: Context) {
         super.attachBaseContext(CalligraphyContextWrapper.wrap(newBase))
@@ -25,11 +29,15 @@ class MenuChooserActivity : AppCompatActivity() {
     }
 
     private fun initListener() {
-        cvElder.setOnClickListener { Log.i("test", "Elder") }
-        cvHandicap.setOnClickListener {  Log.i("test", "cvHandicap")}
+        cvElder.setOnClickListener { showMainMenu(ELDER_TYPE) }
+        cvHandicap.setOnClickListener {  showMainMenu(HANDICAP_TYPE) }
         cvExitApp.setOnClickListener { this.finishAffinity()
             System.exit(0) }
     }
 
-
+    private fun showMainMenu(type: Int){
+        val intent = Intent(applicationContext, MainActivity::class.java)
+        intent.putExtra("USER_TYPE", type)
+        startActivity(intent)
+    }
 }
