@@ -7,14 +7,14 @@ package android.facilitatelauncher.util;
 public class MenuConstant {
 
     public static int EMERGENCY = 0;
-    public static int ALARM_CLOCK = 1;
-    public static int CAMERA = 2;
-    public static int CALCULATOR = 3;
+    public static int PHONE_CALL = 1;
+    public static int ADDRESS_BOOK = 2;
+    public static int ALARM_CLOCK = 3;
     public static int CALENDAR = 4;
-    public static int ADDRESS_BOOK = 5;
-    public static int GALLERY = 6;
-    public static int MUSIC_PLAYER = 7;
-    public static int PHONE_CALL = 8;
+    public static int CALCULATOR = 5;
+    public static int CAMERA = 6;
+    public static int GALLERY = 7;
+    public static int MUSIC_PLAYER = 8;
     public static int RECORDER = 9;
     public static int SETTING = 10;
 }

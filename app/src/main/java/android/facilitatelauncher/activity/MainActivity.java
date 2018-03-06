@@ -47,6 +47,7 @@ public class MainActivity extends AppCompatActivity {
     private int userType = -1;
     private int positionClicked;
     private TextView tvTitle, tvClicked;
+    private int menuCount = 0;
 
     @Override
     protected void attachBaseContext(Context newBase) {
@@ -108,6 +109,7 @@ public class MainActivity extends AppCompatActivity {
         final ClickableViewPager pager = (ClickableViewPager) mContainer.getViewPager();
 
         PagerAdapter adapter = new MyPagerAdapter();
+        menuCount = adapter.getCount();
         bindingPager.setAdapter(adapter);
         bindingPager.setOffscreenPageLimit(adapter.getCount());
 
@@ -159,55 +161,59 @@ public class MainActivity extends AppCompatActivity {
 
     private String getTitle(int position) {
         String title = "";
+        if (position == menuCount-1) {
+            title = "การตั้งค่า";
+            return title;
+        }
         if (position == MenuConstant.EMERGENCY) {
             title = "โทรฉุกเฉิน";
-        } else if (position == MenuConstant.ALARM_CLOCK) {
-            title = "นาฬิกาปลุก";
-        } else if (position == MenuConstant.CAMERA) {
-            title = "กล้อง";
-        } else if (position == MenuConstant.CALCULATOR) {
-            title = "เครื่องคิดเลข";
-        } else if (position == MenuConstant.CALENDAR) {
-            title = "ปฏิทิน";
+        } else if (position == MenuConstant.PHONE_CALL) {
+            title = "โทรศัพท์";
         } else if (position == MenuConstant.ADDRESS_BOOK) {
             title = "รายชื่อผู้ติดต่อ";
+        } else if (position == MenuConstant.ALARM_CLOCK) {
+            title = "นาฬิกาปลุก";
+        } else if (position == MenuConstant.CALENDAR) {
+            title = "ปฏิทิน";
+        } else if (position == MenuConstant.CALCULATOR) {
+            title = "เครื่องคิดเลข";
+        } else if (position == MenuConstant.CAMERA) {
+            title = "กล้อง";
         } else if (position == MenuConstant.GALLERY) {
             title = "คลังภาพ";
         } else if (position == MenuConstant.MUSIC_PLAYER) {
             title = "เครื่องเล่นเพลง";
-        } else if (position == MenuConstant.PHONE_CALL) {
-            title = "โทรศัพท์";
         } else if (position == MenuConstant.RECORDER) {
             title = "เครื่องอัดเสียง";
-        } else if (position == MenuConstant.SETTING) {
-            title = "การตั้งค่า";
         }
         return title;
     }
 
     private void performClicked(int positionClicked) {
+        if (positionClicked == menuCount-1) {
+            btnSettingCLicked();
+            return;
+        }
         if (positionClicked == MenuConstant.EMERGENCY) {
             btnEmergencyClicked();
-        } else if (positionClicked == MenuConstant.ALARM_CLOCK) {
-            btnAlarmClockClicked();
-        } else if (positionClicked == MenuConstant.CAMERA) {
-            btnCameraClicked();
-        } else if (positionClicked == MenuConstant.CALCULATOR) {
-            btnCalculatorClicked();
-        } else if (positionClicked == MenuConstant.CALENDAR) {
-            btnCalendarClicked();
+        } else if (positionClicked == MenuConstant.PHONE_CALL) {
+            btnPhoneCallClicked();
         } else if (positionClicked == MenuConstant.ADDRESS_BOOK) {
             btnContactBookClicked();
+        } else if (positionClicked == MenuConstant.ALARM_CLOCK) {
+            btnAlarmClockClicked();
+        } else if (positionClicked == MenuConstant.CALENDAR) {
+            btnCalendarClicked();
+        } else if (positionClicked == MenuConstant.CALCULATOR) {
+            btnCalculatorClicked();
+        } else if (positionClicked == MenuConstant.CAMERA) {
+            btnCameraClicked();
         } else if (positionClicked == MenuConstant.GALLERY) {
             btnGalleryClicked();
         } else if (positionClicked == MenuConstant.MUSIC_PLAYER) {
             btnMusicPlayerClicked();
-        } else if (positionClicked == MenuConstant.PHONE_CALL) {
-            btnPhoneCallClicked();
         } else if (positionClicked == MenuConstant.RECORDER) {
             btnRecorderClicked();
-        } else if (positionClicked == MenuConstant.SETTING) {
-            btnSettingCLicked();
         }
     }
 
@@ -389,7 +395,8 @@ public class MainActivity extends AppCompatActivity {
                 view.setBackgroundResource(R.drawable.ic_phone);
             } else if (position == MenuConstant.RECORDER) {
                 view.setBackgroundResource(R.drawable.ic_recorder);
-            } else if (position == MenuConstant.SETTING) {
+            }
+            if (position == getCount()-1) {
                 view.setBackgroundResource(R.drawable.ic_settings);
             }
 
