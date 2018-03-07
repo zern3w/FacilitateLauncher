@@ -15,8 +15,8 @@
             android:layout_height="wrap_content"
             android:weightSum="5">
 
-            <TextView
-                android:id="@+id/tvNumber"
+            <EditText
+                android:id="@+id/etNumber"
                 android:layout_width="match_parent"
                 android:layout_height="100dp"
                 android:layout_weight="4"
@@ -24,6 +24,8 @@
                 android:hint="กรอกเบอร์โทรศัพท์"
                 android:padding="16dp"
                 android:singleLine="true"
+                android:inputType="phone"
+                android:maxLength="10"
                 android:textSize="32dp" />
 
             <Button
@@ -31,7 +33,8 @@
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:layout_weight="1"
-                android:text="clear" />
+                android:text="ลบ"
+                android:textSize="40sp"/>
         </LinearLayout>
 
     </LinearLayout>
@@ -195,7 +198,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="100dp"
                 android:layout_weight="1"
-                android:text="เพิ่มเข้าสมุดโทรศัพท์"
+                android:text="บันทึก"
                 android:textSize="@dimen/button_text_size" />
 
             <Button

@@ -1,25 +1,31 @@
 package android.facilitatelauncher.activity;
 
 import android.Manifest;
+import android.app.AlertDialog;
 import android.app.TimePickerDialog;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.facilitatelauncher.DoubleClickListener;
+import android.facilitatelauncher.IntervalTimePickerDialog;
 import android.facilitatelauncher.R;
 import android.facilitatelauncher.util.Helper;
 import android.facilitatelauncher.util.MenuConstant;
 import android.facilitatelauncher.view.ClickableViewPager;
+import android.graphics.Typeface;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.provider.AlarmClock;
 import android.provider.CalendarContract;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.support.design.widget.Snackbar;
 import android.support.v4.app.ActivityCompat;
+import android.support.v4.view.GestureDetectorCompat;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
-import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
@@ -28,6 +34,10 @@ import android.view.Window;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.TimePicker;
+import android.widget.Toast;
+
+import com.afollestad.materialdialogs.DialogAction;
+import com.afollestad.materialdialogs.MaterialDialog;
 
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -39,6 +49,7 @@ import me.crosswall.lib.coverflow.core.PagerContainer;
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 import static android.facilitatelauncher.activity.MenuChooserActivity.ELDER_TYPE;
+import static android.facilitatelauncher.activity.MenuChooserActivity.HANDICAP_TYPE;
 import static android.facilitatelauncher.util.Helper.hasPermissions;
 
 public class MainActivity extends AppCompatActivity {
@@ -47,7 +58,11 @@ public class MainActivity extends AppCompatActivity {
     private int userType = -1;
     private int positionClicked;
     private TextView tvTitle, tvClicked;
+    PagerContainer mContainer;
     private int menuCount = 0;
+    private MediaPlayer mp;
+    private GestureDetectorCompat mDetector;
+
 
     @Override
     protected void attachBaseContext(Context newBase) {
@@ -79,6 +94,9 @@ public class MainActivity extends AppCompatActivity {
         Intent intent = getIntent();
         userType = intent.getIntExtra("USER_TYPE", -1);
         positionClicked = 0;
+        if (userType == HANDICAP_TYPE){
+            playSound(R.raw.menu_emergency);
+        }
     }
 
     private void initView() {
@@ -104,8 +122,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void initViewPager() {
+        mContainer = findViewById(R.id.pagerContainer);
         final ViewPager bindingPager = findViewById(R.id.pager);
-        final PagerContainer mContainer = findViewById(R.id.pagerContainer);
         final ClickableViewPager pager = (ClickableViewPager) mContainer.getViewPager();
 
         PagerAdapter adapter = new MyPagerAdapter();
@@ -163,16 +181,21 @@ public class MainActivity extends AppCompatActivity {
         String title = "";
         if (position == menuCount-1) {
             title = "การตั้งค่า";
+            playSound(R.raw.menu_setting);
             return title;
         }
         if (position == MenuConstant.EMERGENCY) {
             title = "โทรฉุกเฉิน";
+            playSound(R.raw.menu_emergency);
         } else if (position == MenuConstant.PHONE_CALL) {
             title = "โทรศัพท์";
+            playSound(R.raw.menu_phone);
         } else if (position == MenuConstant.ADDRESS_BOOK) {
             title = "รายชื่อผู้ติดต่อ";
+            playSound(R.raw.menu_address_book);
         } else if (position == MenuConstant.ALARM_CLOCK) {
             title = "นาฬิกาปลุก";
+            playSound(R.raw.menu_alarm);
         } else if (position == MenuConstant.CALENDAR) {
             title = "ปฏิทิน";
         } else if (position == MenuConstant.CALCULATOR) {
@@ -221,22 +244,25 @@ public class MainActivity extends AppCompatActivity {
         Calendar mcurrentTime = Calendar.getInstance();
         int hour = mcurrentTime.get(Calendar.HOUR_OF_DAY);
         int minute = mcurrentTime.get(Calendar.MINUTE);
-        TimePickerDialog mTimePicker;
-        mTimePicker = new TimePickerDialog(this, R.style.HoloDialog, new TimePickerDialog.OnTimeSetListener() {
+        IntervalTimePickerDialog mTimePicker;
+        mTimePicker = new IntervalTimePickerDialog(this, R.style.HoloDialog, new IntervalTimePickerDialog.OnTimeSetListener() {
             @Override
             public void onTimeSet(TimePicker timePicker, final int selectedHour, final int selectedMinute) {
                 String selectedTime = Helper.intToString(selectedHour, 2) + ":" + Helper.intToString(selectedMinute, 2);
                 String dialogMessage = getString(R.string.alarm_confirm_dialog_message, selectedTime);
 
-                new AlertDialog.Builder(MainActivity.this)
+                AlertDialog dialog = new AlertDialog.Builder(MainActivity.this)
                         .setTitle(R.string.alarm_confirm_dialog_title)
                         .setMessage(dialogMessage)
                         .setPositiveButton(android.R.string.yes, new DialogInterface.OnClickListener() {
-                            public void onClick(DialogInterface dialog, int whichButton) {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
                                 createAlarm(selectedHour, selectedMinute);
                             }
                         })
                         .setNegativeButton(android.R.string.no, null).show();
+                TextView textView = dialog.findViewById(android.R.id.message);
+                textView.setTextSize(40);
             }
         }, hour, minute, true);
         mTimePicker.setTitle("เลือกเวลา");
@@ -291,22 +317,41 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void btnEmergencyClicked() {
-        AlertDialog.Builder builder = new AlertDialog.Builder(this);
-        builder.setTitle("ยืนยันการโทร");
-        builder.setMessage("คุณต้องการที่จะโทรฉุกเฉิน?");
-        builder.setPositiveButton("ยืนยัน", new DialogInterface.OnClickListener() {
+//        playSound(R.raw.confirm_emergency_call_1);
+        if (userType == HANDICAP_TYPE){
+            playSound(R.raw.confirm_emergency_call_2);
+            mContainer.setOnClickListener(new DoubleClickListener() {
+                @Override
+                public void onSingleClick(View v) {
+                    Toast.makeText(getApplicationContext(), "one", Toast.LENGTH_SHORT).show();
+                }
+
+                @Override
+                public void onDoubleClick(View v) {
+                    Toast.makeText(getApplicationContext(), "db", Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
+        MaterialDialog.Builder builder = new MaterialDialog.Builder(this)
+                .title("ยืนยันการโทร")
+                .content("คุณต้องการที่จะโทรฉุกเฉิน?")
+                .positiveText("ยืนยัน")
+                .negativeText("ยกเลิก")
+                .typeface("RSU_Regular.ttf", "RSU_light.ttf");
+
+        MaterialDialog dialog = builder.build();
+        dialog.getTitleView().setTextSize(40);
+        dialog.getContentView().setTextSize(25);
+        dialog.getActionButton(DialogAction.POSITIVE).setTextSize(25);
+        dialog.getActionButton(DialogAction.NEGATIVE).setTextSize(25);
+        dialog.show();
+
+        builder.onPositive(new MaterialDialog.SingleButtonCallback() {
             @Override
-            public void onClick(DialogInterface dialog, int which) {
+            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
                 emergencyCall();
             }
         });
-        builder.setNegativeButton("ยกเลิก", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialog, int which) {
-                dialog.cancel();
-            }
-        });
-        builder.show();
     }
 
     private void btnGalleryClicked() {
@@ -370,6 +415,19 @@ public class MainActivity extends AppCompatActivity {
         Snackbar.make(findViewById(android.R.id.content), msg, Snackbar.LENGTH_LONG).show();
     }
 
+    private void playSound(int resId) {
+        if (userType == HANDICAP_TYPE){
+            if (mp == null) {
+                mp = new MediaPlayer();
+            } else {
+                mp.release();
+                mp = new MediaPlayer();
+            }
+            mp = MediaPlayer.create(this, resId);
+            mp.start();
+        }
+    }
+
     private class MyPagerAdapter extends PagerAdapter {
 
         @Override
@@ -424,5 +482,11 @@ public class MainActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         return;
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (mp != null) mp.release();
     }
 }

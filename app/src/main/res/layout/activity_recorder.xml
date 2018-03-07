@@ -15,7 +15,7 @@
         android:id="@+id/etName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:textSize="20sp"
+        android:textSize="26sp"
         android:hint="กรอกชื่อผู้ติดต่อ"/>
 
     <TextView
@@ -35,7 +35,7 @@
             android:layout_width="0dp"
             android:layout_height="200dp"
             android:text="เริ่มอัดเสียง"
-            android:textSize="20sp"
+            android:textSize="30sp"
             android:layout_weight="1"/>
 
         <Button
@@ -43,7 +43,7 @@
             android:layout_width="0dp"
             android:layout_height="200dp"
             android:text="หยุดอัดเสียง"
-            android:textSize="20sp"
+            android:textSize="30sp"
             android:layout_weight="1"/>
 
     </LinearLayout>
@@ -52,14 +52,15 @@
         android:id="@+id/btnPlay"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="เล่นเสียงที่อัด"/>
+        android:text="เล่นเสียงที่อัด"
+        android:textSize="16dp"/>
 
     <Button
         android:id="@+id/btnSave"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="bottom"
-        android:textSize="20sp"
+        android:textSize="30sp"
         android:text="บันทึก"/>
 
 </LinearLayout>

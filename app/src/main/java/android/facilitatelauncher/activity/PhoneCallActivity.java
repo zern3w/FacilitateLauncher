@@ -11,14 +11,16 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 public class PhoneCallActivity extends AppCompatActivity implements View.OnClickListener {
-    private TextView tvNumber;
+    private EditText etNumber;
     private Button btnOne, btnTwo, btnThree, btnFour, btnFive,
             btnSix, btnSeven, btnEight, btnNine, btnStar, btnZero, btnNumberSign;
     private Button btnClear, btnAddToContact, btnCall;
@@ -49,11 +51,14 @@ public class PhoneCallActivity extends AppCompatActivity implements View.OnClick
     }
 
     private void initView() {
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.toggleSoftInput(InputMethodManager.SHOW_FORCED,0);
+
         getSupportActionBar().setTitle("สมุดโทรศัพท์");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
 
-        tvNumber = findViewById(R.id.tvNumber);
+        etNumber = findViewById(R.id.etNumber);
         btnOne = findViewById(R.id.btnOne);
         btnTwo = findViewById(R.id.btnTwo);
         btnThree = findViewById(R.id.btnThree);
@@ -140,7 +145,7 @@ public class PhoneCallActivity extends AppCompatActivity implements View.OnClick
                         Toast.LENGTH_SHORT).show();
             } else {
                 Intent intent = new Intent(getApplicationContext(), RecorderActivity.class);
-                intent.putExtra("PHONE", phoneNumber);
+                intent.putExtra("PHONE", etNumber.getText());
                 startActivity(intent);
             }
         } else if (v.getId() == R.id.btnCall) {
@@ -164,7 +169,7 @@ public class PhoneCallActivity extends AppCompatActivity implements View.OnClick
                 .append(phoneNumber)
                 .append(num)
                 .toString();
-        tvNumber.setText(phoneNumber);
+        etNumber.setText(phoneNumber);
     }
 
     private void removeNumber() {
@@ -173,12 +178,12 @@ public class PhoneCallActivity extends AppCompatActivity implements View.OnClick
         } else if (phoneNumber != null && phoneNumber.length() == 1) {
             phoneNumber = "";
         }
-        tvNumber.setText(phoneNumber);
+        etNumber.setText(phoneNumber);
     }
 
     private void makePhoneCall() {
         Intent intent = new Intent(Intent.ACTION_CALL);
-        intent.setData(Uri.parse("tel:" + phoneNumber));
+        intent.setData(Uri.parse("tel:" + etNumber.getText()));
         if (intent.resolveActivity(getPackageManager()) != null) {
             if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.CALL_PHONE) != PackageManager.PERMISSION_GRANTED) {
                 // TODO: Consider calling
@@ -192,5 +197,11 @@ public class PhoneCallActivity extends AppCompatActivity implements View.OnClick
             }
             startActivity(intent);
         }
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (mp != null) mp.release();
     }
 }

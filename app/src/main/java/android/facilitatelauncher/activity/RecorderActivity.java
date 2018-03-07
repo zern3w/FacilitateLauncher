@@ -372,4 +372,10 @@ public class RecorderActivity extends AppCompatActivity implements View.OnClickL
             addToContact(this.getContentResolver(), getApplicationContext());
         }
     }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (mediaPlayer != null) mediaPlayer.release();
+    }
 }
