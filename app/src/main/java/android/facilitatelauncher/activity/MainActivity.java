@@ -10,6 +10,7 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.facilitatelauncher.DoubleClickListener;
 import android.facilitatelauncher.IntervalTimePickerDialog;
+import android.facilitatelauncher.OnSwipeTouchListener;
 import android.facilitatelauncher.R;
 import android.facilitatelauncher.util.Helper;
 import android.facilitatelauncher.util.MenuConstant;
@@ -17,6 +18,7 @@ import android.facilitatelauncher.view.ClickableViewPager;
 import android.graphics.Typeface;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.Handler;
 import android.provider.AlarmClock;
 import android.provider.CalendarContract;
 import android.provider.MediaStore;
@@ -32,6 +34,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.widget.ImageView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
@@ -58,7 +61,8 @@ public class MainActivity extends AppCompatActivity {
     private int userType = -1;
     private int positionClicked;
     private TextView tvTitle, tvClicked;
-    PagerContainer mContainer;
+    private PagerContainer mContainer;
+    private RelativeLayout rlContent;
     private int menuCount = 0;
     private MediaPlayer mp;
     private GestureDetectorCompat mDetector;
@@ -102,6 +106,7 @@ public class MainActivity extends AppCompatActivity {
     private void initView() {
         tvTitle = findViewById(R.id.tvTitle);
         tvClicked = findViewById(R.id.tvClicked);
+        rlContent = findViewById(R.id.rlContent);
         tvTitle.setText("โทรฉุกเฉิน");
     }
 
@@ -313,6 +318,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void btnContactBookClicked() {
         Intent intent = new Intent(getApplicationContext(), AddressBookActivity.class);
+        intent.putExtra("USER_TYPE", userType);
         startActivity(intent);
     }
 
@@ -320,38 +326,82 @@ public class MainActivity extends AppCompatActivity {
 //        playSound(R.raw.confirm_emergency_call_1);
         if (userType == HANDICAP_TYPE){
             playSound(R.raw.confirm_emergency_call_2);
-            mContainer.setOnClickListener(new DoubleClickListener() {
+            rlContent.setOnTouchListener(new OnSwipeTouchListener(MainActivity.this) {
                 @Override
-                public void onSingleClick(View v) {
-                    Toast.makeText(getApplicationContext(), "one", Toast.LENGTH_SHORT).show();
+                public void onClick() {
+                    super.onClick();
+                    // your on click here
                 }
 
                 @Override
-                public void onDoubleClick(View v) {
-                    Toast.makeText(getApplicationContext(), "db", Toast.LENGTH_SHORT).show();
+                public void onDoubleClick() {
+                    super.onDoubleClick();
+                    playSound(R.raw.confirm_call);
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            rlContent.setVisibility(View.GONE);
+                            emergencyCall();
+                        }
+                    },1000);
+
+                }
+
+                @Override
+                public void onLongClick() {
+                    super.onLongClick();
+                    // your on onLongClick here
+                }
+
+                @Override
+                public void onSwipeUp() {
+                    super.onSwipeUp();
+                    // your swipe up here
+                }
+
+                @Override
+                public void onSwipeDown() {
+                    super.onSwipeDown();
+                    // your swipe down here.
+                }
+
+                @Override
+                public void onSwipeLeft() {
+                    super.onSwipeLeft();
+                    rlContent.setVisibility(View.GONE);
+                    playSound(R.raw.cancel);
+                }
+
+                @Override
+                public void onSwipeRight() {
+                    super.onSwipeRight();
+                    rlContent.setVisibility(View.GONE);
+                    playSound(R.raw.cancel);
+                }
+            });
+            rlContent.setVisibility(View.VISIBLE);
+        } else {
+            MaterialDialog.Builder builder = new MaterialDialog.Builder(this)
+                    .title("ยืนยันการโทร")
+                    .content("คุณต้องการที่จะโทรฉุกเฉิน?")
+                    .positiveText("ยืนยัน")
+                    .negativeText("ยกเลิก")
+                    .typeface("RSU_Regular.ttf", "RSU_light.ttf");
+
+            MaterialDialog dialog = builder.build();
+            dialog.getTitleView().setTextSize(40);
+            dialog.getContentView().setTextSize(25);
+            dialog.getActionButton(DialogAction.POSITIVE).setTextSize(25);
+            dialog.getActionButton(DialogAction.NEGATIVE).setTextSize(25);
+            dialog.show();
+
+            builder.onPositive(new MaterialDialog.SingleButtonCallback() {
+                @Override
+                public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                    emergencyCall();
                 }
             });
         }
-        MaterialDialog.Builder builder = new MaterialDialog.Builder(this)
-                .title("ยืนยันการโทร")
-                .content("คุณต้องการที่จะโทรฉุกเฉิน?")
-                .positiveText("ยืนยัน")
-                .negativeText("ยกเลิก")
-                .typeface("RSU_Regular.ttf", "RSU_light.ttf");
-
-        MaterialDialog dialog = builder.build();
-        dialog.getTitleView().setTextSize(40);
-        dialog.getContentView().setTextSize(25);
-        dialog.getActionButton(DialogAction.POSITIVE).setTextSize(25);
-        dialog.getActionButton(DialogAction.NEGATIVE).setTextSize(25);
-        dialog.show();
-
-        builder.onPositive(new MaterialDialog.SingleButtonCallback() {
-            @Override
-            public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
-                emergencyCall();
-            }
-        });
     }
 
     private void btnGalleryClicked() {
@@ -374,6 +424,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void btnPhoneCallClicked() {
         Intent intent = new Intent(this, PhoneCallActivity.class);
+        intent.putExtra("USER_TYPE", userType);
         startActivity(intent);
     }
 
@@ -470,7 +521,7 @@ public class MainActivity extends AppCompatActivity {
         @Override
         public int getCount() {
             if (userType == ELDER_TYPE) return 11;
-            else return 5;
+            else return 4;
         }
 
         @Override
@@ -488,5 +539,13 @@ public class MainActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         if (mp != null) mp.release();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        if (userType == HANDICAP_TYPE){
+            getTitle(positionClicked);
+        }
     }
 }

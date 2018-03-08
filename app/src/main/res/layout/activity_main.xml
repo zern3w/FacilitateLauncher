@@ -9,6 +9,21 @@
     android:background="@drawable/bg"
     tools:context=".activity.MainActivity">
 
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/rlContent"
+        android:visibility="gone">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="แตะสองครั้งเพื่อโทร\nหรือ สไลด์เพื่อยกเลิก"
+            android:textSize="36sp"
+            android:layout_centerInParent="true"/>
+
+    </RelativeLayout>
+
     <me.crosswall.lib.coverflow.core.PagerContainer
         android:id="@+id/pagerContainer"
         android:layout_width="match_parent"

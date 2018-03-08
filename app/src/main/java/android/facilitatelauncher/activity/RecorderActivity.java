@@ -15,6 +15,7 @@ import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Environment;
+import android.os.Handler;
 import android.provider.ContactsContract;
 import android.provider.MediaStore;
 import android.support.v4.app.ActivityCompat;
@@ -42,6 +43,7 @@ import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
 
 import static android.Manifest.permission.RECORD_AUDIO;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
+import static android.facilitatelauncher.activity.MenuChooserActivity.HANDICAP_TYPE;
 
 public class RecorderActivity extends AppCompatActivity implements View.OnClickListener {
     public static final int RequestPermissionCode = 1;
@@ -57,6 +59,7 @@ public class RecorderActivity extends AppCompatActivity implements View.OnClickL
     private String phoneNumber;
     private boolean isPlayingRecord;
     private Manager manager;
+    private int userType = -1;
 
     @Override
     protected void attachBaseContext(Context newBase) {
@@ -125,9 +128,43 @@ public class RecorderActivity extends AppCompatActivity implements View.OnClickL
     private void initInstance() {
         Intent intent = getIntent();
         phoneNumber = intent.getStringExtra("PHONE");
+        userType = intent.getIntExtra("USER_TYPE", -1);
         random = new Random();
         isPlayingRecord = false;
         manager = new Manager();
+
+        if (userType == HANDICAP_TYPE){
+            playSound(R.raw.start_record);
+
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    playSound(R.raw.beep);
+                    startRecord();
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            playSound(R.raw.end_record);
+                            stopRecord();
+                            playLastRecord();
+                            new Handler().postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                    addToContact(RecorderActivity.this.getContentResolver(), getApplicationContext());
+                                    playSound(R.raw.save_success);
+                                    new Handler().postDelayed(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            finish();
+                                        }
+                                    }, 2000);
+                                }
+                            }, 5000);
+                        }
+                    }, 5000);
+                }
+            }, 2000);
+        }
     }
 
     private void addToContact(ContentResolver resolver, Context context) {
@@ -371,6 +408,17 @@ public class RecorderActivity extends AppCompatActivity implements View.OnClickL
         } else if (v.getId() == R.id.btnSave) {
             addToContact(this.getContentResolver(), getApplicationContext());
         }
+    }
+
+    private void playSound(int resId) {
+        if (mediaPlayer == null) {
+            mediaPlayer = new MediaPlayer();
+        } else {
+            mediaPlayer.release();
+            mediaPlayer = new MediaPlayer();
+        }
+        mediaPlayer = MediaPlayer.create(this, resId);
+        mediaPlayer.start();
     }
 
     @Override

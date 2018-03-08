@@ -3,29 +3,45 @@ package android.facilitatelauncher.activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.facilitatelauncher.OnSwipeTouchListener;
 import android.facilitatelauncher.R;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.Handler;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.lang.reflect.Array;
+import java.util.Arrays;
+import java.util.List;
+
 import uk.co.chrisjenx.calligraphy.CalligraphyContextWrapper;
+
+import static android.facilitatelauncher.activity.MenuChooserActivity.HANDICAP_TYPE;
 
 public class PhoneCallActivity extends AppCompatActivity implements View.OnClickListener {
     private EditText etNumber;
     private Button btnOne, btnTwo, btnThree, btnFour, btnFive,
             btnSix, btnSeven, btnEight, btnNine, btnStar, btnZero, btnNumberSign;
     private Button btnClear, btnAddToContact, btnCall;
+    private RelativeLayout rlContent;
+    private TextView tvTitle;
     private String phoneNumber;
     private MediaPlayer mp;
+    private boolean isNumberConfirmed = false;
+    private int userType = -1;
 
     @Override
     protected void attachBaseContext(Context newBase) {
@@ -52,9 +68,9 @@ public class PhoneCallActivity extends AppCompatActivity implements View.OnClick
 
     private void initView() {
         InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.toggleSoftInput(InputMethodManager.SHOW_FORCED,0);
+        imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
 
-        getSupportActionBar().setTitle("สมุดโทรศัพท์");
+        getSupportActionBar().setTitle("โทรศัพท์");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
 
@@ -74,10 +90,18 @@ public class PhoneCallActivity extends AppCompatActivity implements View.OnClick
         btnClear = findViewById(R.id.btnClear);
         btnAddToContact = findViewById(R.id.btnAddToContact);
         btnCall = findViewById(R.id.btnCall);
+        rlContent = findViewById(R.id.rlContent);
+        tvTitle = findViewById(R.id.tvTitle);
     }
 
     private void initInstance() {
         phoneNumber = "";
+        Intent intent = getIntent();
+        userType = intent.getIntExtra("USER_TYPE", -1);
+
+        if (userType == HANDICAP_TYPE){
+            playSound(R.raw.tap_talk);
+        }
     }
 
     private void initListener() {
@@ -96,6 +120,173 @@ public class PhoneCallActivity extends AppCompatActivity implements View.OnClick
         btnClear.setOnClickListener(this);
         btnAddToContact.setOnClickListener(this);
         btnCall.setOnClickListener(this);
+
+        if (userType == HANDICAP_TYPE) {
+            etNumber.addTextChangedListener(new TextWatcher() {
+                @Override
+                public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+                }
+
+                @Override
+                public void onTextChanged(CharSequence charSequence, int i, int count, int i2) {
+                    if (etNumber.getText().toString().length() == 10) {
+                        rlContent.setVisibility(View.VISIBLE);
+                        hideKeyboard();
+                        confirmNumber();
+                    }
+                }
+
+                @Override
+                public void afterTextChanged(Editable editable) {
+
+                }
+            });
+        }
+    }
+
+    private void confirmNumber() {
+        rlContent.setOnTouchListener(new OnSwipeTouchListener(PhoneCallActivity.this) {
+            @Override
+            public void onClick() {
+                super.onClick();
+                // your on click here
+            }
+
+            @Override
+            public void onDoubleClick() {
+                super.onDoubleClick();
+                if (!isNumberConfirmed) {
+                    playSound(R.raw.confirm_number_menu);
+                    isNumberConfirmed = true;
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            playSound(R.raw.confirm_calling);
+                            tvTitle.setText("แตะสองครั้งเพื่อโทร \nหรือ สไลด์เพื่อบันทึก");
+                        }
+                    }, 1400);
+                } else {
+                    playSound(R.raw.calling);
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            makePhoneCall();
+                            finish();
+                        }
+                    }, 700);
+                }
+
+            }
+
+            @Override
+            public void onLongClick() {
+                super.onLongClick();
+                // your on onLongClick here
+            }
+
+            @Override
+            public void onSwipeUp() {
+                super.onSwipeUp();
+                // your swipe up here
+            }
+
+            @Override
+            public void onSwipeDown() {
+                super.onSwipeDown();
+                // your swipe down here.
+            }
+
+            @Override
+            public void onSwipeLeft() {
+                super.onSwipeLeft();
+                onSwiped();
+            }
+
+            @Override
+            public void onSwipeRight() {
+                super.onSwipeRight();
+                onSwiped();
+            }
+        });
+        String number = etNumber.getText().toString();
+        String[] separated = number.split("");
+        List<String> numbers = Arrays.asList(separated);
+
+        for (int i = 0; i < numbers.size(); i++) {
+            playConfirmNumber(numbers.get(i));
+            try {
+                Thread.sleep(600);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+            if (i == numbers.size() - 1) playSound(R.raw.confirm_number);
+        }
+    }
+
+    private void onSwiped() {
+        if (!isNumberConfirmed) {
+            rlContent.setVisibility(View.GONE);
+            etNumber.setText("");
+            phoneNumber = "";
+            playSound(R.raw.menu_edit);
+            showKeyboard();
+        } else {
+            playSound(R.raw.save);
+            new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    finish();
+                    Intent intent = new Intent(getApplicationContext(), RecorderActivity.class);
+                    intent.putExtra("PHONE", etNumber.getText().toString());
+                    intent.putExtra("USER_TYPE", userType);
+                    startActivity(intent);
+                }
+            }, 700);
+        }
+    }
+
+    private void playConfirmNumber(String number) {
+        switch (number) {
+            case "0":
+                playSound(R.raw.num0);
+                break;
+            case "1":
+                playSound(R.raw.num1);
+                break;
+            case "2":
+                playSound(R.raw.num2);
+                break;
+            case "3":
+                playSound(R.raw.num3);
+                break;
+            case "4":
+                playSound(R.raw.num4);
+                break;
+            case "5":
+                playSound(R.raw.num5);
+                break;
+            case "6":
+                playSound(R.raw.num6);
+                break;
+            case "7":
+                playSound(R.raw.num7);
+                break;
+            case "8":
+                playSound(R.raw.num8);
+                break;
+            case "9":
+                playSound(R.raw.num9);
+                break;
+            default:
+                playSound(R.raw.confirm_number_menu);
+                try {
+                    Thread.sleep(1200);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                break;
+        }
     }
 
 
@@ -140,12 +331,12 @@ public class PhoneCallActivity extends AppCompatActivity implements View.OnClick
         } else if (v.getId() == R.id.btnClear) {
             removeNumber();
         } else if (v.getId() == R.id.btnAddToContact) {
-            if (phoneNumber.trim().equals("")){
+            if (phoneNumber.trim().equals("")) {
                 Toast.makeText(getApplicationContext(), "โปรดกรอกเบอร์โทร!",
                         Toast.LENGTH_SHORT).show();
             } else {
                 Intent intent = new Intent(getApplicationContext(), RecorderActivity.class);
-                intent.putExtra("PHONE", etNumber.getText());
+                intent.putExtra("PHONE", etNumber.getText().toString());
                 startActivity(intent);
             }
         } else if (v.getId() == R.id.btnCall) {
@@ -203,5 +394,19 @@ public class PhoneCallActivity extends AppCompatActivity implements View.OnClick
     protected void onDestroy() {
         super.onDestroy();
         if (mp != null) mp.release();
+        hideKeyboard();
+    }
+
+    private void showKeyboard() {
+        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+        imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
+    }
+
+    private void hideKeyboard() {
+        View view = this.getCurrentFocus();
+        if (view != null) {
+            InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
+            imm.hideSoftInputFromWindow(view.getWindowToken(), 0);
+        }
     }
 }
