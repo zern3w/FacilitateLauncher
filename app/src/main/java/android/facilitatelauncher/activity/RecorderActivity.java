@@ -244,7 +244,7 @@ public class RecorderActivity extends AppCompatActivity implements View.OnClickL
     }
 
     private void stopRecord() {
-        mediaRecorder.stop();
+        if (mediaRecorder != null) mediaRecorder.stop();
         buttonStop.setEnabled(false);
         buttonPlayLastRecordAudio.setEnabled(true);
         buttonStart.setEnabled(true);

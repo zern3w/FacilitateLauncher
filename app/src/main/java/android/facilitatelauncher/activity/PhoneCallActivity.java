@@ -42,6 +42,7 @@ public class PhoneCallActivity extends AppCompatActivity implements View.OnClick
     private MediaPlayer mp;
     private boolean isNumberConfirmed = false;
     private int userType = -1;
+    private TextWatcher textWatcher;
 
     @Override
     protected void attachBaseContext(Context newBase) {
@@ -67,9 +68,6 @@ public class PhoneCallActivity extends AppCompatActivity implements View.OnClick
     }
 
     private void initView() {
-        InputMethodManager imm = (InputMethodManager) getSystemService(Context.INPUT_METHOD_SERVICE);
-        imm.toggleSoftInput(InputMethodManager.SHOW_FORCED, 0);
-
         getSupportActionBar().setTitle("โทรศัพท์");
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         getSupportActionBar().setHomeButtonEnabled(true);
@@ -101,6 +99,7 @@ public class PhoneCallActivity extends AppCompatActivity implements View.OnClick
 
         if (userType == HANDICAP_TYPE){
             playSound(R.raw.tap_talk);
+            showKeyboard();
         }
     }
 
@@ -120,32 +119,43 @@ public class PhoneCallActivity extends AppCompatActivity implements View.OnClick
         btnClear.setOnClickListener(this);
         btnAddToContact.setOnClickListener(this);
         btnCall.setOnClickListener(this);
+        setconfirmNumberListener();
+
+        textWatcher = new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence charSequence, int i, int count, int i2) {
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                String result = s.toString().replaceAll("\\s","");
+                if (result.length() >= 10) {
+                    rlContent.setVisibility(View.VISIBLE);
+                    hideKeyboard();
+                    etNumber.removeTextChangedListener(textWatcher);
+                    etNumber.setText(result);
+                    new Handler().postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                            confirmNumber();
+                        }
+                    },500);
+
+                }
+            }
+        };
 
         if (userType == HANDICAP_TYPE) {
-            etNumber.addTextChangedListener(new TextWatcher() {
-                @Override
-                public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-
-                }
-
-                @Override
-                public void onTextChanged(CharSequence charSequence, int i, int count, int i2) {
-                    if (etNumber.getText().toString().length() == 10) {
-                        rlContent.setVisibility(View.VISIBLE);
-                        hideKeyboard();
-                        confirmNumber();
-                    }
-                }
-
-                @Override
-                public void afterTextChanged(Editable editable) {
-
-                }
-            });
+            etNumber.addTextChangedListener(textWatcher);
         }
     }
 
-    private void confirmNumber() {
+    private void setconfirmNumberListener() {
         rlContent.setOnTouchListener(new OnSwipeTouchListener(PhoneCallActivity.this) {
             @Override
             public void onClick() {
@@ -209,18 +219,23 @@ public class PhoneCallActivity extends AppCompatActivity implements View.OnClick
                 onSwiped();
             }
         });
+    }
+
+    private void confirmNumber(){
         String number = etNumber.getText().toString();
         String[] separated = number.split("");
         List<String> numbers = Arrays.asList(separated);
 
-        for (int i = 0; i < numbers.size(); i++) {
-            playConfirmNumber(numbers.get(i));
-            try {
-                Thread.sleep(600);
-            } catch (Exception e) {
-                e.printStackTrace();
+        if (numbers.size() == 11) {
+            for (int i = 0; i < numbers.size(); i++) {
+                playConfirmNumber(numbers.get(i));
+                try {
+                    Thread.sleep(600);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+                if (i == numbers.size() - 1) playSound(R.raw.confirm_number);
             }
-            if (i == numbers.size() - 1) playSound(R.raw.confirm_number);
         }
     }
 
@@ -228,6 +243,7 @@ public class PhoneCallActivity extends AppCompatActivity implements View.OnClick
         if (!isNumberConfirmed) {
             rlContent.setVisibility(View.GONE);
             etNumber.setText("");
+            etNumber.addTextChangedListener(textWatcher);
             phoneNumber = "";
             playSound(R.raw.menu_edit);
             showKeyboard();
